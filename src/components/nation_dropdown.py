@@ -4,7 +4,7 @@ from . import ids
 
 
 def render(app: Dash) -> html.Div:
-    all_nations = ["Sount Korea", "China", "Canada"]
+    all_nations = ["South Korea", "China", "Canada"]
 
     @app.callback(
         Output(ids.NATION_DROPDOWN, "value"),
