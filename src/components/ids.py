@@ -1,2 +1,2 @@
 NATION_DROPDOWN = "nation-dropdown"
-NATION_BUTTON = "nation-button"
+SELECT_ALL_NATIONS_BUTTON = "select-all-nations-button"
