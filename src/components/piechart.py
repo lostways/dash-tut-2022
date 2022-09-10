@@ -1,5 +1,5 @@
 from dash import Dash, dcc, html
-import plotly.express as px
+import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 import pandas as pd
 
@@ -9,14 +9,14 @@ from . import ids
 
 def render(app: Dash, data: pd.DataFrame) -> html.Div:
     @app.callback(
-        Output(ids.BARCHART, "children"),
+        Output(ids.PIECHART, "children"),
         [
             Input(ids.YEAR_DROPDOWN, "value"),
             Input(ids.MONTH_DROPDOWN, "value"),
             Input(ids.CATEGORY_DROPDOWN, "value"),
         ],
     )
-    def update_barchart(
+    def update_piechart(
         years: list[str], months: list[str], categories: list[str]
     ) -> html.Div:
         filtered_data = data.query(
@@ -26,22 +26,15 @@ def render(app: Dash, data: pd.DataFrame) -> html.Div:
         if filtered_data.shape[0] == 0:
             return html.Div("No data selected")
 
-        def create_pivot_table() -> pd.DataFrame:
-            pt = filtered_data.pivot_table(
-                values=DataSchema.AMOUNT,
-                index=DataSchema.CATEGORY,
-                aggfunc="sum",
-                fill_value=0,
-            )
-            return pt.reset_index().sort_values(DataSchema.AMOUNT, ascending=False)
-
-        fig = px.bar(
-            create_pivot_table(),
-            x=DataSchema.CATEGORY,
-            y=DataSchema.AMOUNT,
-            color=DataSchema.CATEGORY,
+        pie = go.Pie(
+            labels=filtered_data[DataSchema.CATEGORY].tolist(),
+            values=filtered_data[DataSchema.AMOUNT].tolist(),
+            hole=0.5,
         )
 
-        return html.Div(dcc.Graph(figure=fig), id=ids.BARCHART)
+        fig = go.Figure(data=[pie])
+        fig.update_layout(margin={"t": 40, "b": 0, "l": 0, "r": 0})
+        fig.update_traces(hovertemplate="%{label}<br>$%{value:.2f}<extra></extra>")
+        return html.Div(dcc.Graph(figure=fig), id=ids.PIECHART)
 
-    return html.Div(id=ids.BARCHART)
+    return html.Div(id=ids.PIECHART)
