@@ -1,34 +1,39 @@
+from typing import Protocol
+import i18n
 from dash import Dash, html, dcc
 from dash.dependencies import Input, Output
-import pandas as pd
-from ..data.loader import DataSchema
 from . import ids
 
 
-def render(app: Dash, data: pd.DataFrame) -> html.Div:
-    all_years: list[str] = data[DataSchema.YEAR].tolist()
-    unique_years = sorted(set(all_years), key=int)
+class YearsDataSource(Protocol):
+    @property
+    def unique_years(self) -> list[str]:
+        ...
 
+
+def render(app: Dash, source: YearsDataSource) -> html.Div:
     @app.callback(
         Output(ids.YEAR_DROPDOWN, "value"),
         Input(ids.SELECT_ALL_YEARS_BUTTON, "n_clicks"),
     )
     def select_all_years(_: int) -> list[str]:
-        return unique_years
+        return source.unique_years
 
     return html.Div(
         children=[
-            html.H6("Year"),
+            html.H6(i18n.t("general.year")),
             dcc.Dropdown(
                 id=ids.YEAR_DROPDOWN,
-                options=[{"label": year, "value": year} for year in unique_years],
-                value=all_years,
+                options=[
+                    {"label": year, "value": year} for year in source.unique_years
+                ],
+                value=source.unique_years,
                 multi=True,
             ),
             html.Button(
                 id=ids.SELECT_ALL_YEARS_BUTTON,
                 className="dropdown-button",
-                children=["Select All"],
+                children=[i18n.t("general.select_all")],
             ),
         ]
     )

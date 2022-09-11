@@ -1,16 +1,25 @@
 from dash import Dash
 from dash_bootstrap_components.themes import BOOTSTRAP
+import i18n
+
 from src.components.layout import create_layout
 from src.data.loader import load_transaction_data
+from src.data.source import DataSource
 
 DATA_PATH = "./data/transactions.csv"
+LOCALE = "en"
 
 
 def main() -> None:
-    data = load_transaction_data(DATA_PATH)
+    i18n.set("locale", LOCALE)
+    i18n.load_path.append("locale")
+
+    data = load_transaction_data(DATA_PATH, LOCALE)
+    source = DataSource(data)
+
     app = Dash(external_stylesheets=[BOOTSTRAP])
-    app.title = "Financical Dashboard"
-    app.layout = create_layout(app, data)
+    app.title = i18n.t("general.app_title")
+    app.layout = create_layout(app, source)
     app.run()
 
 
