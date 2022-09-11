@@ -1,12 +1,18 @@
+from typing import Protocol
 from dash import Dash, html, dcc
 from dash.dependencies import Input, Output
 import i18n
 
-from ..data.source import DataSource
 from . import ids
 
 
-def render(app: Dash, source: DataSource) -> html.Div:
+class CategoryDataSource(Protocol):
+    @property
+    def unique_categories(self) -> list[str]:
+        ...
+
+
+def render(app: Dash, source: CategoryDataSource) -> html.Div:
     @app.callback(
         Output(ids.CATEGORY_DROPDOWN, "value"),
         [
@@ -16,7 +22,7 @@ def render(app: Dash, source: DataSource) -> html.Div:
         ],
     )
     def update_categories(_: int, years: list[str], months: list[str]) -> list[str]:
-        filtered_data = source.filter(years, months, None)
+        filtered_data = source.filter(years=years, months=months)
         return filtered_data.unique_categories
 
     return html.Div(

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Optional
 from dataclasses import dataclass
+from calendar import month_name
 import pandas as pd
 
 from .loader import DataSchema
@@ -12,9 +13,9 @@ class DataSource:
 
     def filter(
         self,
-        years: Optional[list[str]],
-        months: Optional[list[str]],
-        categories: Optional[list[str]],
+        years: Optional[list[str]] = None,
+        months: Optional[list[str]] = None,
+        categories: Optional[list[str]] = None,
     ) -> DataSource:
         if years is None:
             years = self.unique_years
@@ -36,9 +37,20 @@ class DataSource:
         )
         return pt.reset_index().sort_values(DataSchema.AMOUNT, ascending=False)
 
+    def create_month_pivot_table(self) -> pd.DataFrame:
+        df = self._data
+        pt = df.pivot_table(
+            index=DataSchema.MONTH,
+            values=DataSchema.AMOUNT,
+            columns=DataSchema.CATEGORY,
+            aggfunc="sum",
+            fill_value=0,
+        )
+        return pt
+
     @property
     def row_count(self):
-        return self._data.shape
+        return self._data.shape[0]
 
     @property
     def all_years(self) -> list[str]:
@@ -62,7 +74,8 @@ class DataSource:
 
     @property
     def unique_months(self) -> list[str]:
-        return sorted(set(self.all_months))
+        month_lookup = list(month_name)
+        return sorted(set(self.all_months), key=month_lookup.index)
 
     @property
     def unique_categories(self) -> list[str]:

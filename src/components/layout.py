@@ -1,5 +1,12 @@
 from dash import Dash, html
-from . import year_dropdown, month_dropdown, category_dropdown, barchart, piechart
+from . import (
+    year_dropdown,
+    month_dropdown,
+    category_dropdown,
+    barchart,
+    piechart,
+    linechart,
+)
 from ..data.source import DataSource
 
 
@@ -16,6 +23,9 @@ def create_layout(app: Dash, source: DataSource) -> html.Div:
                     month_dropdown.render(app, source),
                     category_dropdown.render(app, source),
                 ],
+            ),
+            html.Div(
+                className="line-container", children=[linechart.render(app, source)]
             ),
             html.Div(
                 className="bar-container", children=[barchart.render(app, source)]
